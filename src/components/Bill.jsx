@@ -1,4 +1,4 @@
-export default function Bill({ denom, onClick, count, small }) {
+export default function Bill({ denom, onClick, count, small, fluid }) {
   // Real US bills are 2.35:1 aspect ratio
   const W = small ? 120 : 176;
   const H = Math.round(W / 2.35);
@@ -8,8 +8,9 @@ export default function Bill({ denom, onClick, count, small }) {
       onClick={onClick}
       style={{
         position: 'relative',
-        width: W,
-        height: H,
+        width: fluid ? '100%' : W,
+        height: fluid ? 'auto' : H,
+        aspectRatio: fluid ? '2.35 / 1' : undefined,
         padding: 0,
         border: 'none',
         background: 'none',
@@ -50,7 +51,7 @@ export default function Bill({ denom, onClick, count, small }) {
         background: 'rgba(0,0,0,0.45)',
         color: '#fff',
         textAlign: 'center',
-        fontSize: small ? 13 : 17,
+        fontSize: small ? 13 : fluid ? 'clamp(13px, 3vw, 17px)' : 17,
         fontWeight: 900,
         fontFamily: "'Nunito', sans-serif",
         padding: small ? '1px 0' : '2px 0',

@@ -21,6 +21,10 @@ export function formatMoney(cents) {
   return dollars.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 }
 
+export function formatCoins(cents) {
+  return `${cents}¢`;
+}
+
 export function generateChangeScenario() {
   // Purchase: $5–$49 with realistic cent endings
   const dollars = Math.floor(Math.random() * 45) + 5; // 5–49

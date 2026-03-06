@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { generateCountCollection, formatMoney } from '../money';
+import { generateCountCollection, formatMoney, formatCoins } from '../money';
 import { BILLS, COINS } from '../money';
 import Bill from './Bill';
 import Coin from './Coin';
@@ -24,18 +24,27 @@ export default function CountMode() {
       setState(s => ({ ...s, input: s.input.slice(0, -1), result: null }));
       return;
     }
-    if (key === '.' && state.input.includes('.')) return;
-    if (key === '.' && state.input === '') {
-      setState(s => ({ ...s, input: '0.' }));
-      return;
+    if (!coinsOnly) {
+      if (key === '.' && state.input.includes('.')) return;
+      if (key === '.' && state.input === '') {
+        setState(s => ({ ...s, input: '0.' }));
+        return;
+      }
+      const next = state.input + key;
+      if (next.split('.')[1]?.length > 2) return;
+      setState(s => ({ ...s, input: next, result: null }));
+    } else {
+      if (key === '.') return;
+      const next = state.input + key;
+      if (parseInt(next, 10) > 999) return;
+      setState(s => ({ ...s, input: next, result: null }));
     }
-    const next = state.input + key;
-    if (next.split('.')[1]?.length > 2) return;
-    setState(s => ({ ...s, input: next, result: null }));
   };
 
   const check = () => {
-    const entered = Math.round(parseFloat(state.input || '0') * 100);
+    const entered = coinsOnly
+      ? parseInt(state.input || '0', 10)
+      : Math.round(parseFloat(state.input || '0') * 100);
     if (Math.abs(entered - state.totalCents) < 0.5) {
       setState(s => ({ ...s, result: 'correct' }));
     } else {
@@ -78,10 +87,10 @@ export default function CountMode() {
         {billItems.length > 0 && (
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize:11, color:'#90a4ae', fontWeight:600, marginBottom:8, textTransform:'uppercase', letterSpacing:0.5 }}>Bills</div>
-            <div style={{ display:'flex', flexWrap:'wrap', gap:10, justifyContent:'center' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:10 }}>
               {billItems.map(item => {
                 const denom = BILLS.find(b => b.id === item.id) || item;
-                return <Bill key={item.uid} denom={denom} onClick={() => {}} />;
+                return <Bill key={item.uid} denom={denom} onClick={() => {}} fluid />;
               })}
             </div>
           </div>
@@ -99,7 +108,7 @@ export default function CountMode() {
         )}
         {state.result === 'correct' && (
           <div style={{ marginTop:10, textAlign:'center', color:'#2e7d32', fontWeight:'bold', fontSize:16 }}>
-            Total: {formatMoney(state.totalCents)}
+            Total: {coinsOnly ? formatCoins(state.totalCents) : formatMoney(state.totalCents)}
           </div>
         )}
       </div>
@@ -117,7 +126,7 @@ export default function CountMode() {
           border: `2px solid ${state.result === 'correct' ? '#4caf50' : '#ff9800'}`,
         }}>
           {state.result === 'correct'
-            ? `Great job! The answer is ${formatMoney(state.totalCents)}`
+            ? `Great job! The answer is ${coinsOnly ? formatCoins(state.totalCents) : formatMoney(state.totalCents)}`
             : `Not quite! Try counting again.`}
         </div>
       )}
@@ -136,31 +145,38 @@ export default function CountMode() {
         minHeight: 58,
         letterSpacing: 2,
       }}>
-        {state.input ? `$${state.input}` : <span style={{ color:'#b0bec5' }}>$0.00</span>}
+        {coinsOnly
+          ? (state.input ? `${state.input}¢` : <span style={{ color:'#b0bec5' }}>0¢</span>)
+          : (state.input ? `$${state.input}` : <span style={{ color:'#b0bec5' }}>$0.00</span>)}
       </div>
 
       {/* Keypad */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
-        {['1','2','3','4','5','6','7','8','9','.','0','DEL'].map(k => (
-          <button
-            key={k}
-            onClick={() => handleKeypad(k)}
-            style={{
-              padding: '16px 0',
-              fontSize: k === 'DEL' ? 14 : 22,
-              fontWeight: 'bold',
-              background: k === 'DEL' ? '#ffebee' : 'white',
-              color: k === 'DEL' ? '#c62828' : '#1a237e',
-              border: `2px solid ${k === 'DEL' ? '#ef9a9a' : '#90caf9'}`,
-              borderRadius: 10,
-              cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
-            {k}
-          </button>
-        ))}
+        {['1','2','3','4','5','6','7','8','9','.','0','DEL'].map(k => {
+          if (k === '.' && coinsOnly) {
+            return <div key={k} />;
+          }
+          return (
+            <button
+              key={k}
+              onClick={() => handleKeypad(k)}
+              style={{
+                padding: '16px 0',
+                fontSize: k === 'DEL' ? 14 : 22,
+                fontWeight: 'bold',
+                background: k === 'DEL' ? '#ffebee' : 'white',
+                color: k === 'DEL' ? '#c62828' : '#1a237e',
+                border: `2px solid ${k === 'DEL' ? '#ef9a9a' : '#90caf9'}`,
+                borderRadius: 10,
+                cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              {k}
+            </button>
+          );
+        })}
       </div>
 
       {/* Actions */}

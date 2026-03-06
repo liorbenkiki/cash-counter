@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { BILLS, COINS, formatMoney, randomTarget } from '../money';
+import { BILLS, COINS, formatMoney, formatCoins, randomTarget } from '../money';
 import Bill from './Bill';
 import Coin from './Coin';
 import ModeToggle from './ModeToggle';
@@ -67,13 +67,13 @@ export default function BuildMode() {
           MAKE THIS AMOUNT
         </div>
         <div style={{ color:'white', fontSize:48, fontWeight:'bold', fontFamily:'monospace', lineHeight:1 }}>
-          {formatMoney(targetCents)}
+          {coinsOnly ? formatCoins(targetCents) : formatMoney(targetCents)}
         </div>
         <div style={{ color:'#64b5f6', fontSize:13, marginTop:6 }}>
           {remaining > 0
-            ? `${formatMoney(remaining)} more to go`
+            ? `${coinsOnly ? formatCoins(remaining) : formatMoney(remaining)} more to go`
             : remaining < 0
-            ? `${formatMoney(-remaining)} too much!`
+            ? `${coinsOnly ? formatCoins(-remaining) : formatMoney(-remaining)} too much!`
             : "That's exactly right!"}
         </div>
       </div>
@@ -92,8 +92,8 @@ export default function BuildMode() {
           animation: 'pop 0.2s ease',
         }}>
           {result === 'correct' && '🎉 Perfect! You did it!'}
-          {result === 'over' && `Too much! You have ${formatMoney(totalCents - targetCents)} extra.`}
-          {result === 'under' && `Not quite! You still need ${formatMoney(remaining)}.`}
+          {result === 'over' && `Too much! You have ${coinsOnly ? formatCoins(totalCents - targetCents) : formatMoney(totalCents - targetCents)} extra.`}
+          {result === 'under' && `Not quite! You still need ${coinsOnly ? formatCoins(remaining) : formatMoney(remaining)}.`}
         </div>
       )}
 
@@ -123,7 +123,7 @@ export default function BuildMode() {
           )}
         {collection.length > 0 && (
           <div style={{ marginTop:10, fontSize:15, fontWeight:'bold', color:'#37474f', textAlign:'right' }}>
-            Total: {formatMoney(totalCents)}
+            Total: {coinsOnly ? formatCoins(totalCents) : formatMoney(totalCents)}
           </div>
         )}
       </div>
@@ -132,9 +132,9 @@ export default function BuildMode() {
       {!coinsOnly && (
         <div>
           <div style={{ fontSize:12, color:'#546e7a', fontWeight:600, marginBottom:6, textTransform:'uppercase', letterSpacing:0.5 }}>Bills — tap to add</div>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:10, justifyContent:'center' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:10 }}>
             {BILLS.map(b => (
-              <Bill key={b.id} denom={b} onClick={() => addItem(b, 'bill')} count={countOf(b.id)} />
+              <Bill key={b.id} denom={b} onClick={() => addItem(b, 'bill')} count={countOf(b.id)} fluid />
             ))}
           </div>
         </div>
