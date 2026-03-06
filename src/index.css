@@ -1,0 +1,26 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #f0f4ff;
+  min-height: 100dvh;
+  overscroll-behavior: none;
+}
+
+button {
+  font-family: inherit;
+  touch-action: manipulation;
+}
+
+@keyframes pop {
+  0%   { transform: scale(0.9); opacity: 0.5; }
+  60%  { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
